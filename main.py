@@ -1,46 +1,54 @@
+import sys
 import pygame
 from constants import *
 from player import Player
 from asteroid import Asteroid
 from asteroidfield import AsteroidField
+from shot import Shot
+
 
 def main():
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
-    dt = 0
-    running = True
 
     updatable = pygame.sprite.Group()
     drawable = pygame.sprite.Group()
-    asteroids_groupe = pygame.sprite.Group()
+    asteroids = pygame.sprite.Group()
+    shots = pygame.sprite.Group()
+
+    Asteroid.containers = (asteroids, updatable, drawable)
+    AsteroidField.containers = updatable
+    asteroid_field = AsteroidField()
 
     Player.containers = (updatable, drawable)
-    Asteroid.containers = (asteroids_groupe, updatable, drawable)
-    AsteroidField.containers = (updatable)
 
-    player = Player(SCREEN_WIDTH/2, SCREEN_HEIGHT/2)
-    asteroids_field = AsteroidField()
+    player = Player(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
 
-    while running:
+    dt = 0
+
+    while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                running = False
-            
-        screen.fill("black")
+                return
+
         updatable.update(dt)
 
-        for draw in drawable:
-            draw.draw(screen)
+        for asteroid in asteroids:
+            if asteroid.collides_with(player):
+                print("Game over!")
+                sys.exit()
+
+        screen.fill("black")
+
+        for obj in drawable:
+            obj.draw(screen)
 
         pygame.display.flip()
 
+        # limit the framerate to 60 FPS
         dt = clock.tick(60) / 1000
 
-    pygame.quit()
-    return
 
-
-#This line ensures the main() function is only called when this file is run directly;
 if __name__ == "__main__":
     main()
